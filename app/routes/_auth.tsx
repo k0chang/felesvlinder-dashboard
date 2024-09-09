@@ -1,6 +1,10 @@
-import { Outlet } from "@remix-run/react";
+import { Outlet, redirect } from "@remix-run/react";
+import { auth } from "~/lib/firebase";
 
 export async function loader() {
+  if (auth.currentUser) {
+    return redirect("/");
+  }
   return null;
 }
 

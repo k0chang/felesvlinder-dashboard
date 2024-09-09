@@ -4,7 +4,7 @@ import { FirebaseError } from "firebase/app";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { auth } from "~/lib/firebase/firebase";
+import { auth } from "~/lib/firebase";
 
 export default function Login() {
   const actionData = useActionData<typeof action>();

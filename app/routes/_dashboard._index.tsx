@@ -1,6 +1,5 @@
-import { json, MetaFunction, redirect, useLoaderData } from "@remix-run/react";
-import { Button } from "~/components/ui/button";
-import { auth } from "~/lib/firebase/firebase";
+import { MetaFunction, redirect } from "@remix-run/react";
+import { auth } from "~/lib/firebase";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,28 +8,10 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export async function action() {
-  await auth.signOut();
-  return redirect("/login");
-}
-
 export async function loader() {
   const user = auth.currentUser;
   if (!user) {
     return redirect("/login");
   }
-  return json({ user: { email: user.email } });
-}
-
-export default function DashboardHome() {
-  const data = useLoaderData<{ user: { email: string } }>();
-  return (
-    <>
-      <h1>Dashboard home</h1>
-      <p>User: {data.user.email}</p>
-      <form action="/?index" method="post">
-        <Button>ログアウト</Button>
-      </form>
-    </>
-  );
+  return redirect("/gallery");
 }
