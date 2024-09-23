@@ -1,5 +1,12 @@
-import { MetaFunction, redirect } from "@remix-run/react";
-import { auth } from "~/lib/firebase";
+import {
+  json,
+  MetaFunction,
+  useLoaderData,
+  useNavigate,
+} from "@remix-run/react";
+import { useEffect } from "react";
+import { useFirebase } from "~/hooks/use-firebase";
+import { firebaseConfig } from "~/lib/firebase";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,9 +16,21 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader() {
-  const user = auth.currentUser;
-  if (!user) {
-    return redirect("/sign-in");
-  }
-  return redirect("/gallery");
+  return json({ firebaseConfig });
+}
+
+export default function Dashboard() {
+  const { firebaseConfig } = useLoaderData<typeof loader>();
+  const { auth } = useFirebase(firebaseConfig);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!auth.currentUser) {
+      navigate("/sign-in");
+    }
+    navigate("/gallery");
+  }, [auth.currentUser, navigate]);
+
+  return null;
 }

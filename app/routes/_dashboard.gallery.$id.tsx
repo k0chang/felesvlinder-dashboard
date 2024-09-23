@@ -9,7 +9,13 @@ import {
   useNavigation,
 } from "@remix-run/react";
 import { FirebaseError } from "firebase/app";
-import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
+import {
+  deleteDoc,
+  doc,
+  getDoc,
+  getFirestore,
+  updateDoc,
+} from "firebase/firestore";
 import {
   deleteObject,
   getDownloadURL,
@@ -17,10 +23,12 @@ import {
   uploadBytes,
 } from "firebase/storage";
 import { ArrowLeft } from "lucide-react";
-import { DragEvent, useRef, useState } from "react";
+import { ChangeEvent, useState } from "react";
+import { useDropzone } from "react-dropzone-esm";
 import { LoadingView } from "~/components/loading/loading-view";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
   Dialog,
   DialogClose,
@@ -90,7 +98,8 @@ export default function GalleryDetail() {
         width: gallery.width,
         height: gallery.height,
         inSlideView: inSlideView === "on",
-        updatedAt: Date.now(),
+        // フォームに変更があった場合のみ更新日時を更新
+        updatedAt: form.dirty ? Date.now() : gallery.updatedAt,
         createdAt: gallery.createdAt ?? Date.now(),
       };
       if (file) {
@@ -101,12 +110,14 @@ export default function GalleryDetail() {
             ref(storage, `images/gallery/${gallery.filename}`)
           );
         } catch (e) {
-          console.error(e);
+          toast({ title: "よくわからんエラー", variant: "destructive" });
+          return;
         }
         try {
           await uploadBytes(storageRef, file);
         } catch (e) {
-          console.error(e);
+          toast({ title: "よくわからんエラー", variant: "destructive" });
+          return;
         }
         const url = await getDownloadURL(storageRef);
 
@@ -137,30 +148,42 @@ export default function GalleryDetail() {
       inSlideView: gallery.inSlideView ? "on" : null,
     },
   });
-  const [dragState, setDragState] = useState<"over" | "leave">("leave");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function handleDragOver(e: DragEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragState("over");
-  }
+  const onDrop = (acceptedFiles: File[]) => {
+    setFile(acceptedFiles[0]);
+  };
 
-  function handleDragLeave(e: DragEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragState("leave");
-  }
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    setFile(e.target.files[0]);
+  };
 
-  function handleDrop(e: DragEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragState("leave");
+  const {
+    getInputProps: getDropzoneInputProps,
+    getRootProps,
+    isDragActive,
+  } = useDropzone({
+    onDrop,
+    accept: { "image/*": [] },
+  });
 
-    const files = e.dataTransfer?.files;
-    if (files?.length) {
-      setFile(files[0]);
+  async function handleDelete() {
+    try {
+      await deleteDoc(doc(db, "gallery", gallery.id));
+      const imgRef = ref(storage, `images/gallery/${gallery.filename}`);
+      await deleteObject(imgRef);
+      toast({
+        title: "削除しました",
+        className: "bg-green-500 text-white",
+      });
+
+      navigate("/gallery");
+    } catch (e) {
+      toast({
+        title: "削除に失敗しました",
+        className: "bg-red-500 text-white",
+      });
     }
   }
 
@@ -180,18 +203,12 @@ export default function GalleryDetail() {
         <div className="relative min-h-[500px]">
           <img src={gallery.url} alt="Current" className="object-contain" />
         </div>
-        <button
+        <div
+          {...getRootProps()}
           className={cn(
             "relative w-full flex min-h-[500px] flex-col items-center justify-center gap-2 rounded-md border border-dashed border-[#444444]",
-            dragState === "over" && "border-orange-600 bg-orange-100"
+            isDragActive && "border-orange-600 bg-orange-100"
           )}
-          type="button"
-          onClick={() => {
-            fileInputRef.current?.click();
-          }}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
         >
           <div>
             {!file && <p>ドラッグ&ドロップも可能</p>}
@@ -202,29 +219,19 @@ export default function GalleryDetail() {
                 className="object-contain"
               />
             )}
-            <input
-              type="file"
-              name="image"
-              ref={fileInputRef}
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                if (e.target.files?.length) {
-                  setFile(e.target.files[0]);
-                }
-              }}
-            />
+            <Input {...getDropzoneInputProps()} onChange={onChange} />
           </div>
-        </button>
+        </div>
 
         <label
           htmlFor={field.inSlideView.name}
-          className="flex items-center my-3"
+          className="my-3 flex items-center"
         >
-          <Input
-            {...getInputProps(field.inSlideView, { type: "checkbox" })}
+          <Checkbox
+            defaultChecked={!!field.inSlideView.value}
+            name={field.inSlideView.name}
             id={field.inSlideView.name}
-            className="mr-2 size-10 rounded-full"
+            className="size-10 mr-2"
           />
           スライドビューに表示する
         </label>
@@ -261,11 +268,7 @@ export default function GalleryDetail() {
                       キャンセル
                     </Button>
                   </DialogClose>
-                  <Button
-                    type="submit"
-                    name="confirm-delete"
-                    variant="destructive"
-                  >
+                  <Button variant="destructive" onClick={handleDelete}>
                     確定
                   </Button>
                 </div>
