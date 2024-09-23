@@ -9,6 +9,7 @@ import {
 } from "@remix-run/react";
 import { doc, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import crypto from "node:crypto";
 import { ChangeEvent, useState } from "react";
 import { FileRejection, useDropzone } from "react-dropzone-esm";
 import { LoadingView } from "~/components/loading/loading-view";
