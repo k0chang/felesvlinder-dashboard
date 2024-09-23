@@ -9,7 +9,6 @@ import {
 } from "@remix-run/react";
 import { doc, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import crypto from "node:crypto";
 import { ChangeEvent, useState } from "react";
 import { FileRejection, useDropzone } from "react-dropzone-esm";
 import { LoadingView } from "~/components/loading/loading-view";
@@ -59,7 +58,7 @@ export default function GalleryPost() {
         await uploadBytes(storageRef, file);
         const url = await getDownloadURL(storageRef);
 
-        const id = crypto.randomUUID();
+        const id = window.crypto.randomUUID();
         const payload: GalleryPayload = {
           title,
           description: description ?? "",
