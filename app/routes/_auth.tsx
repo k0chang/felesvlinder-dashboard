@@ -1,4 +1,5 @@
-import { json, Outlet, useLoaderData, useNavigate } from "@remix-run/react";
+import { json } from "@remix-run/cloudflare";
+import { Outlet, useLoaderData, useNavigate } from "@remix-run/react";
 import { useEffect } from "react";
 import { useFirebase } from "~/hooks/use-firebase";
 import { firebaseConfig } from "~/lib/firebase";
