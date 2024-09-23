@@ -16,7 +16,7 @@ export async function loader() {
 
 export default function Layout() {
   const { firebaseConfig } = useLoaderData<typeof loader>();
-  const { auth } = useFirebase(firebaseConfig);
+  const { auth, user } = useFirebase(firebaseConfig);
 
   const navigate = useNavigate();
 
@@ -25,7 +25,7 @@ export default function Layout() {
       navigate("/sign-in");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth]);
+  }, [user]);
 
   return (
     <div className={"flex grow flex-col bg-[#f1f1f1]"}>

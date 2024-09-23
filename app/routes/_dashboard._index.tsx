@@ -30,7 +30,8 @@ export default function Dashboard() {
       navigate("/sign-in");
     }
     navigate("/gallery");
-  }, [auth.currentUser, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return null;
 }
