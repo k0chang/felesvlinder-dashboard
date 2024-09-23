@@ -1,13 +1,13 @@
 import { json, Link, useLoaderData } from "@remix-run/react";
 import { format } from "date-fns";
-import { collection, getDocs, query } from "firebase/firestore";
+import { collection, getDocs, getFirestore, query } from "firebase/firestore";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { db } from "~/lib/firebase";
 import { cn } from "~/lib/utils";
 import { gallerySchema } from "~/models/gallery";
 
 export async function loader() {
+  const db = getFirestore();
   const q = query(collection(db, "gallery"));
   const querySnapshot = await getDocs(q);
   const data = querySnapshot.docs.map((doc) => doc.data());

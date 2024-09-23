@@ -7,5 +7,5 @@ export async function loader() {
 
 export async function action() {
   await auth.signOut();
-  return redirect("/login");
+  return redirect("/sign-in");
 }

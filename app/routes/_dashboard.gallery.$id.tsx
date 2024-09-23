@@ -1,14 +1,15 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { ActionFunctionArgs, json, LoaderFunctionArgs } from "@remix-run/node";
+import { json, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import {
   Form,
   Link,
-  useActionData,
   useLoaderData,
+  useNavigate,
   useNavigation,
 } from "@remix-run/react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { FirebaseError } from "firebase/app";
+import { doc, getDoc, getFirestore, updateDoc } from "firebase/firestore";
 import {
   deleteObject,
   getDownloadURL,
@@ -17,129 +18,123 @@ import {
 } from "firebase/storage";
 import { ArrowLeft } from "lucide-react";
 import { DragEvent, useRef, useState } from "react";
-import { z } from "zod";
 import { LoadingView } from "~/components/loading/loading-view";
-import { Button } from "~/components/ui/button";
+import { Button, buttonVariants } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
-import { db, storage } from "~/lib/firebase";
+import { useFirebase } from "~/hooks/use-firebase";
+import { useToast } from "~/hooks/use-toast";
+import { firebaseConfig } from "~/lib/firebase";
 import { cn } from "~/lib/utils";
-import { gallerySchema } from "~/models/gallery";
+import { galleryFormSchema, gallerySchema } from "~/models/gallery";
 import { getImageFileMeta } from "~/utils/image";
-
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-
-  const submission = parseWithZod(formData, { schema: galleryFormSchema });
-  if (submission.status !== "success") {
-    return json(submission.reply());
-  }
-  const { id, title, description, inSlideView, createdAt, image, filename } =
-    submission.value;
-  if (image) {
-    const fileMeta = await getImageFileMeta(image);
-    const storageRef = ref(storage, `images/gallery/${image.name}`);
-    await deleteObject(ref(storage, `images/gallery/${filename}`));
-    await uploadBytes(storageRef, image);
-    const url = await getDownloadURL(
-      ref(storage, `images/gallery/${image.name}`)
-    );
-
-    const payload = {
-      title,
-      description: description || "",
-      url,
-      filename: image.name,
-      width: fileMeta.width,
-      height: fileMeta.height,
-      inSlideView: inSlideView === "on",
-      updatedAt: Date.now(),
-      createdAt: createdAt ? createdAt : Date.now(),
-    };
-    await updateDoc(doc(db, "gallery", id), payload);
-    console.log("updated");
-  } else {
-    const payload = {
-      title,
-      description: description || "",
-      inSlideView: inSlideView === "on",
-      updatedAt: Date.now(),
-      createdAt: createdAt ? createdAt : Date.now(),
-    };
-    await updateDoc(doc(db, "gallery", id), payload);
-  }
-
-  return json(submission.reply());
-}
 
 export async function loader({ params }: LoaderFunctionArgs) {
   if (!params.id) {
     throw new Response("Not found", { status: 404 });
   }
+  const db = getFirestore();
   const docRef = doc(db, "gallery", params.id);
   const docSnap = await getDoc(docRef);
   if (!docSnap.exists()) {
     throw new Response("Not found", { status: 404 });
   }
 
-  return json({ gallery: gallerySchema.parse(docSnap.data()) });
+  return json({ gallery: gallerySchema.parse(docSnap.data()), firebaseConfig });
 }
 
-const galleryFormSchema = z.object({
-  id: z.string(),
-  title: z.preprocess(
-    (val) => (val === "" ? undefined : val),
-    z.string({ required_error: "タイトルを入力してください" })
-  ),
-  description: z.string().optional(),
-  inSlideView: z.union([z.literal("on"), z.null()]),
-  image: z.instanceof(File, { message: "選択してください" }).optional(),
-  filename: z.string(),
-  createdAt: z.number().optional(),
-});
-export const galleryPayloadSchema = z.object({
-  title: z.string(),
-  description: z.string().optional(),
-  url: z.string().optional(),
-  id: z.string().optional(),
-  filename: z.string(),
-  width: z.number(),
-  height: z.number(),
-  inSlideView: z.boolean(),
-  updatedAt: z.number(),
-  createdAt: z.number(),
-});
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    {
+      title: data?.gallery.title
+        ? `${data.gallery.title} | Gallery`
+        : "Gallery",
+    },
+  ];
+};
 
 export default function GalleryDetail() {
-  const { gallery } = useLoaderData<typeof loader>();
-  const lastResult = useActionData<typeof action>();
+  const { gallery, firebaseConfig } = useLoaderData<typeof loader>();
+  const { db, storage } = useFirebase(firebaseConfig);
 
   const navigation = useNavigation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
   const [form, field] = useForm({
-    lastResult,
     onValidate: ({ formData }) => {
-      if (file) {
-        formData.append("image", file);
-      }
-
       return parseWithZod(formData, { schema: galleryFormSchema });
     },
-    shouldValidate: "onInput",
+    onSubmit: async (event, { formData }) => {
+      event.preventDefault();
+      const submission = parseWithZod(formData, { schema: galleryFormSchema });
+      if (submission.status !== "success") {
+        return submission.reply();
+      }
+      const { title, description, inSlideView } = submission.value;
+
+      let payload = {
+        title,
+        description: description ?? "",
+        filename: gallery.filename,
+        url: gallery.url,
+        width: gallery.width,
+        height: gallery.height,
+        inSlideView: inSlideView === "on",
+        updatedAt: Date.now(),
+        createdAt: gallery.createdAt ?? Date.now(),
+      };
+      if (file) {
+        const { width, height } = await getImageFileMeta(file);
+        const storageRef = ref(storage, `images/gallery/${file.name}`);
+        try {
+          await deleteObject(
+            ref(storage, `images/gallery/${gallery.filename}`)
+          );
+        } catch (e) {
+          console.error(e);
+        }
+        try {
+          await uploadBytes(storageRef, file);
+        } catch (e) {
+          console.error(e);
+        }
+        const url = await getDownloadURL(storageRef);
+
+        payload = {
+          ...payload,
+          url,
+          filename: file.name,
+          width,
+          height,
+        };
+      }
+      try {
+        await updateDoc(doc(db, "gallery", gallery.id), payload);
+        navigate("/gallery");
+      } catch (e) {
+        if (e instanceof FirebaseError) {
+          if (e.code === "permission-denied") {
+            toast({ title: "権限が足らん", variant: "destructive" });
+            return;
+          }
+        }
+        toast({ title: "よくわからんエラー", variant: "destructive" });
+      }
+    },
     defaultValue: {
       title: gallery.title,
       description: gallery.description,
       inSlideView: gallery.inSlideView ? "on" : null,
-      image: undefined,
-      filename: gallery.filename,
     },
   });
   const [dragState, setDragState] = useState<"over" | "leave">("leave");
@@ -164,12 +159,13 @@ export default function GalleryDetail() {
     setDragState("leave");
 
     const files = e.dataTransfer?.files;
-    if (files?.length && files[0].type.includes("image")) {
+    if (files?.length) {
       setFile(files[0]);
     }
   }
+
   return (
-    <Form method="post" encType="multipart/form-data" {...getFormProps(form)}>
+    <Form {...getFormProps(form)}>
       <div className="mb-3 flex items-center gap-2">
         <Button variant={"ghost"} asChild>
           <Link to={"/gallery"}>
@@ -207,9 +203,9 @@ export default function GalleryDetail() {
               />
             )}
             <input
-              {...getInputProps(field.image, { type: "file" })}
-              ref={fileInputRef}
+              type="file"
               name="image"
+              ref={fileInputRef}
               accept="image/*"
               className="hidden"
               onChange={(e) => {
@@ -220,16 +216,19 @@ export default function GalleryDetail() {
             />
           </div>
         </button>
-        <p className="text-red-600 text-sm">{field.image.errors?.[0]}</p>
 
-        <label htmlFor="inSlideView" className="flex items-center my-3">
+        <label
+          htmlFor={field.inSlideView.name}
+          className="flex items-center my-3"
+        >
           <Input
             {...getInputProps(field.inSlideView, { type: "checkbox" })}
-            id="inSlideView"
-            className="mr-2 size-10"
+            id={field.inSlideView.name}
+            className="mr-2 size-10 rounded-full"
           />
           スライドビューに表示する
         </label>
+        <p className="text-red-600 text-sm">{field.inSlideView.errors?.[0]}</p>
 
         <Input
           {...getInputProps(field.title, { type: "text" })}
@@ -243,19 +242,21 @@ export default function GalleryDetail() {
 
         <div className="mt-5 flex justify-end gap-3">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button type="button" variant={"destructive"} className="">
-                削除
-              </Button>
+            <DialogTrigger
+              type="button"
+              className={buttonVariants({ variant: "destructive" })}
+            >
+              削除
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>確認</DialogTitle>
+                <DialogDescription />
               </DialogHeader>
               <div>
                 <p>本当に？</p>
                 <div className="mt-6 flex justify-end gap-4">
-                  <DialogClose>
+                  <DialogClose asChild>
                     <Button type="button" variant="secondary">
                       キャンセル
                     </Button>
@@ -271,10 +272,7 @@ export default function GalleryDetail() {
               </div>
             </DialogContent>
           </Dialog>
-          <Button
-            type="submit"
-            disabled={!form.valid || navigation.state === "submitting"}
-          >
+          <Button disabled={!form.valid || navigation.state === "submitting"}>
             保存
           </Button>
         </div>

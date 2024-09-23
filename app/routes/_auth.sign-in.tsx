@@ -6,7 +6,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { auth } from "~/lib/firebase";
 
-export default function Login() {
+export default function SignIn() {
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   return (
@@ -57,11 +57,11 @@ export async function action({ request }: ActionFunctionArgs): Promise<
           { status: 400 }
         );
       }
-      return json(
-        { errors: { root: "何かしらのエラーが起きました" } },
-        { status: 400 }
-      );
     }
+    return json(
+      { errors: { root: "何かしらのエラーが起きました" } },
+      { status: 400 }
+    );
   }
 
   return redirect("/");

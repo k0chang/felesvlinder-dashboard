@@ -5,9 +5,7 @@ export default function Layout() {
   return (
     <div className={"flex grow flex-col bg-[#f1f1f1]"}>
       <div
-        className={
-          "flex items-center justify-between bg-[#ca4a00] p-2 text-white"
-        }
+        className={"flex items-center justify-between bg-black p-2 text-white"}
       >
         <div className={"ml-2 flex gap-6"}>
           <Link to={"/gallery"}>GALLERY</Link>

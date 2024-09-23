@@ -11,7 +11,7 @@ export const meta: MetaFunction = () => {
 export async function loader() {
   const user = auth.currentUser;
   if (!user) {
-    return redirect("/login");
+    return redirect("/sign-in");
   }
   return redirect("/gallery");
 }
