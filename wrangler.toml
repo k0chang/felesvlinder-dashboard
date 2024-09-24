@@ -16,7 +16,6 @@ pages_build_output_dir = "./build/client"
 # Note: Use secrets to store sensitive data.
 # - https://developers.cloudflare.com/pages/functions/bindings/#secrets
 [vars]
-FIREBASE_API_KEY = "AIzaSyAdxwQFN46Gq5YqGUjW6dLONR2V53R5OT4"
 FIREBASE_AUTH_DOMAIN = "felesvlinder-7e64a.firebaseapp.com"
 FIREBASE_PROJECT_ID = "felesvlinder-7e64a"
 FIREBASE_STORAGE_BUCKET = "felesvlinder-7e64a.appspot.com"
