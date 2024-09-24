@@ -1,5 +1,6 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
+import { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import {
   Form,
   json,
@@ -17,13 +18,22 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { useFirebase } from "~/hooks/use-firebase";
 import { useToast } from "~/hooks/use-toast";
-import { firebaseConfig } from "~/lib/firebase";
+import { firebaseConfigFromEnv } from "~/lib/firebase";
 import { cn } from "~/lib/utils";
 import { galleryFormSchema, GalleryPayload } from "~/models/gallery";
 import { getImageFileMeta } from "~/utils/image";
 
-export async function loader() {
-  return json({ firebaseConfig });
+export const meta: MetaFunction = () => {
+  return [
+    { title: "新規投稿 | FELESVLINDER" },
+    { name: "description", content: "画像を投稿するページだぜ" },
+  ];
+};
+
+export async function loader({ context }: LoaderFunctionArgs) {
+  return json({
+    firebaseConfig: firebaseConfigFromEnv(context.cloudflare.env),
+  });
 }
 
 export default function GalleryPost() {
@@ -115,7 +125,7 @@ export default function GalleryPost() {
 
   return (
     <Form {...getFormProps(form)}>
-      <h1>画像を投稿</h1>
+      <h1>新規投稿</h1>
       <div
         {...getRootProps()}
         className={cn(

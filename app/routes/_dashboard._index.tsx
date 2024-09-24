@@ -1,3 +1,4 @@
+import { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import {
   json,
   MetaFunction,
@@ -6,7 +7,7 @@ import {
 } from "@remix-run/react";
 import { useEffect } from "react";
 import { useFirebase } from "~/hooks/use-firebase";
-import { firebaseConfig } from "~/lib/firebase";
+import { firebaseConfigFromEnv } from "~/lib/firebase";
 
 export const meta: MetaFunction = () => {
   return [
@@ -15,8 +16,10 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export async function loader() {
-  return json({ firebaseConfig });
+export async function loader({ context }: LoaderFunctionArgs) {
+  return json({
+    firebaseConfig: firebaseConfigFromEnv(context.cloudflare.env),
+  });
 }
 
 export default function Dashboard() {

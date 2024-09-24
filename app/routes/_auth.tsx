@@ -1,11 +1,13 @@
-import { json } from "@remix-run/cloudflare";
+import { json, LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Outlet, useLoaderData, useNavigate } from "@remix-run/react";
 import { useEffect } from "react";
 import { useFirebase } from "~/hooks/use-firebase";
-import { firebaseConfig } from "~/lib/firebase";
+import { firebaseConfigFromEnv } from "~/lib/firebase";
 
-export async function loader() {
-  return json({ firebaseConfig });
+export async function loader({ context }: LoaderFunctionArgs) {
+  return json({
+    firebaseConfig: firebaseConfigFromEnv(context.cloudflare.env),
+  });
 }
 
 // 認証系共通のレイアウト

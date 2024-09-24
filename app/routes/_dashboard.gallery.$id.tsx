@@ -41,12 +41,12 @@ import {
 import { Input } from "~/components/ui/input";
 import { useFirebase } from "~/hooks/use-firebase";
 import { useToast } from "~/hooks/use-toast";
-import { firebaseConfig } from "~/lib/firebase";
+import { firebaseConfigFromEnv } from "~/lib/firebase";
 import { cn } from "~/lib/utils";
 import { galleryFormSchema, gallerySchema } from "~/models/gallery";
 import { getImageFileMeta } from "~/utils/image";
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ params, context }: LoaderFunctionArgs) {
   if (!params.id) {
     throw new Response("Not found", { status: 404 });
   }
@@ -57,15 +57,18 @@ export async function loader({ params }: LoaderFunctionArgs) {
     throw new Response("Not found", { status: 404 });
   }
 
-  return json({ gallery: gallerySchema.parse(docSnap.data()), firebaseConfig });
+  return json({
+    gallery: gallerySchema.parse(docSnap.data()),
+    firebaseConfig: firebaseConfigFromEnv(context.cloudflare.env),
+  });
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
     {
       title: data?.gallery.title
-        ? `${data.gallery.title} | Gallery`
-        : "Gallery",
+        ? `📝 ${data.gallery.title} | Gallery`
+        : "📝 Gallery",
     },
   ];
 };
@@ -199,10 +202,12 @@ export default function GalleryDetail() {
       </div>
 
       <Card className="rounded-none p-7">
-        <p>現在の画像</p>
-        <div className="relative min-h-[500px]">
+        <h2 className="font-bold text-lg">Before</h2>
+        <div className="relative min-h-[500px] mb-4">
           <img src={gallery.url} alt="Current" className="object-contain" />
         </div>
+
+        <h2 className="font-bold text-lg">After</h2>
         <div
           {...getRootProps()}
           className={cn(

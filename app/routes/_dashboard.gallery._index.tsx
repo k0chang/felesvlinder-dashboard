@@ -1,3 +1,4 @@
+import { MetaFunction } from "@remix-run/cloudflare";
 import { json, Link, useLoaderData } from "@remix-run/react";
 import { format } from "date-fns";
 import {
@@ -11,6 +12,13 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 import { gallerySchema } from "~/models/gallery";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "全投稿 | FELESVLINDER" },
+    { name: "description", content: "全投稿の一覧だよ" },
+  ];
+};
 
 export async function loader() {
   const db = getFirestore();

@@ -1,6 +1,6 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { MetaFunction } from "@remix-run/cloudflare";
+import { json, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import {
   Form,
   useLoaderData,
@@ -14,7 +14,7 @@ import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { useFirebase } from "~/hooks/use-firebase";
-import { firebaseConfig } from "~/lib/firebase";
+import { firebaseConfigFromEnv } from "~/lib/firebase";
 
 const signInFormSchema = z.object({
   email: z
@@ -27,9 +27,11 @@ export const meta: MetaFunction = () => {
   return [{ title: "ログイン | FELESVLINDER" }];
 };
 
-export const loader = () => {
-  return { firebaseConfig };
-};
+export async function loader({ context }: LoaderFunctionArgs) {
+  return json({
+    firebaseConfig: firebaseConfigFromEnv(context.cloudflare.env),
+  });
+}
 
 export default function SignIn() {
   const { firebaseConfig } = useLoaderData<typeof loader>();
