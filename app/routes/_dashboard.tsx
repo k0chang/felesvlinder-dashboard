@@ -19,9 +19,21 @@ export default function Layout() {
         className={"flex items-center justify-between bg-black p-2 text-white"}
       >
         <div className={"ml-2 flex gap-6"}>
-          <Link to={"/gallery"}>GALLERY</Link>
-          <Link to={"/about"}>ABOUT</Link>
-          <Link to={"/contact"}>CONTACT</Link>
+          <Link
+            to={"/gallery"}
+            className="hover:text-blue-400 transition-colors"
+          >
+            GALLERY
+          </Link>
+          <Link to={"/about"} className="hover:text-blue-400 transition-colors">
+            ABOUT
+          </Link>
+          <Link
+            to={"/contact"}
+            className="hover:text-blue-400 transition-colors"
+          >
+            CONTACT
+          </Link>
         </div>
         <Button
           variant={"secondary"}

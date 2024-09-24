@@ -1,6 +1,5 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { MetaFunction } from "@remix-run/cloudflare";
 import { Form, useNavigate, useNavigation } from "@remix-run/react";
 import { FirebaseError } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -16,9 +15,10 @@ const signInFormSchema = z.object({
   password: z.string({ required_error: "パスワードを入力" }),
 });
 
-export const meta: MetaFunction = () => {
-  return [{ title: "ログイン | FELESVLINDER" }];
-};
+export function clientLoader() {
+  document.title = "ログイン | FELESVLINDER";
+  return null;
+}
 
 export default function SignIn() {
   const auth = getAuth();
@@ -58,7 +58,7 @@ export default function SignIn() {
 
   return (
     <>
-      <h1 className="text-lg font-bold">ログインして♡</h1>
+      <h1 className="text-lg font-bold">Sign in to customize Felesvlinder.</h1>
       <Form {...getFormProps(form)} className="flex flex-col gap-3 mt-6">
         <Input
           {...getInputProps(field.email, { type: "email" })}

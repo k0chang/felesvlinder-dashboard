@@ -1,6 +1,5 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { json } from "@remix-run/cloudflare";
 import {
   ClientLoaderFunctionArgs,
   Form,
@@ -59,9 +58,9 @@ export async function clientLoader({ params }: ClientLoaderFunctionArgs) {
 
   document.title = `${docSnap.data().title} | Gallery`;
 
-  return json({
+  return {
     gallery: gallerySchema.parse(docSnap.data()),
-  });
+  };
 }
 
 export default function GalleryDetail() {
@@ -251,7 +250,7 @@ export default function GalleryDetail() {
             >
               削除
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="font-serif">
               <DialogHeader>
                 <DialogTitle>確認</DialogTitle>
                 <DialogDescription />
