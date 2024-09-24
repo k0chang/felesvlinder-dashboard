@@ -1,4 +1,3 @@
-import { MetaFunction } from "@remix-run/cloudflare";
 import { json, Link, useLoaderData } from "@remix-run/react";
 import { format } from "date-fns";
 import {
@@ -13,29 +12,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 import { gallerySchema } from "~/models/gallery";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "全投稿 | FELESVLINDER" },
-    { name: "description", content: "全投稿の一覧だよ" },
-  ];
-};
+export async function clientLoader() {
+  document.title = "全投稿 | FELESVLINDER";
 
-export async function loader() {
-  try {
-    const db = getFirestore();
-    const q = query(collection(db, "gallery"), orderBy("updatedAt", "desc"));
-    const querySnapshot = await getDocs(q);
-    const data = querySnapshot.docs.map((doc) => doc.data());
+  const db = getFirestore();
+  const q = query(collection(db, "gallery"), orderBy("updatedAt", "desc"));
+  const querySnapshot = await getDocs(q);
+  const data = querySnapshot.docs.map((doc) => doc.data());
 
-    return json({ gallery: gallerySchema.array().parse(data) });
-  } catch (error) {
-    console.error(error);
-    return json({ gallery: [] }, { status: 500 });
+  const result = gallerySchema.array().safeParse(data);
+  if (!result.success) {
+    return json({ gallery: [] });
   }
+
+  return json({ gallery: result.data });
 }
+clientLoader.hydrate = true;
 
 export default function Gallery() {
-  const { gallery } = useLoaderData<typeof loader>();
+  const { gallery } = useLoaderData<typeof clientLoader>();
   return (
     <div>
       <Card className="rounded-none p-7">

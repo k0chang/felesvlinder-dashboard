@@ -1,8 +1,7 @@
-import { MetaFunction } from "@remix-run/cloudflare";
-
-export const meta: MetaFunction = () => {
-  return [{ title: "About | FELESVLINDER" }];
-};
+export async function clientLoader() {
+  document.title = "About | FELESVLINDER";
+  return null;
+}
 
 export default function About() {
   return "About";

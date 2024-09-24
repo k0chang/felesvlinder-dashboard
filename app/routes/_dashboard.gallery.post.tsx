@@ -1,44 +1,26 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import {
-  Form,
-  json,
-  useLoaderData,
-  useNavigate,
-  useNavigation,
-} from "@remix-run/react";
-import { doc, setDoc } from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { Form, useNavigate, useNavigation } from "@remix-run/react";
+import { doc, getFirestore, setDoc } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { ChangeEvent, useState } from "react";
 import { FileRejection, useDropzone } from "react-dropzone-esm";
 import { LoadingView } from "~/components/loading/loading-view";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
-import { useFirebase } from "~/hooks/use-firebase";
 import { useToast } from "~/hooks/use-toast";
-import { firebaseConfigFromEnv } from "~/lib/firebase";
 import { cn } from "~/lib/utils";
 import { galleryFormSchema, GalleryPayload } from "~/models/gallery";
 import { getImageFileMeta } from "~/utils/image";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "新規投稿 | FELESVLINDER" },
-    { name: "description", content: "画像を投稿するページだぜ" },
-  ];
-};
-
-export async function loader({ context }: LoaderFunctionArgs) {
-  return json({
-    firebaseConfig: firebaseConfigFromEnv(context.cloudflare.env),
-  });
+export async function clientLoader() {
+  document.title = "新規投稿 | FELESVLINDER";
+  return null;
 }
 
 export default function GalleryPost() {
-  const { firebaseConfig } = useLoaderData<typeof loader>();
-  const { storage, db } = useFirebase(firebaseConfig);
+  const [storage, db] = [getStorage(), getFirestore()];
 
   const navigation = useNavigation();
   const navigate = useNavigate();

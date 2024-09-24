@@ -1,20 +1,13 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { json, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import {
-  Form,
-  useLoaderData,
-  useNavigate,
-  useNavigation,
-} from "@remix-run/react";
+import { MetaFunction } from "@remix-run/cloudflare";
+import { Form, useNavigate, useNavigation } from "@remix-run/react";
 import { FirebaseError } from "firebase/app";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { useFirebase } from "~/hooks/use-firebase";
-import { firebaseConfigFromEnv } from "~/lib/firebase";
 
 const signInFormSchema = z.object({
   email: z
@@ -27,15 +20,8 @@ export const meta: MetaFunction = () => {
   return [{ title: "ログイン | FELESVLINDER" }];
 };
 
-export async function loader({ context }: LoaderFunctionArgs) {
-  return json({
-    firebaseConfig: firebaseConfigFromEnv(context.cloudflare.env),
-  });
-}
-
 export default function SignIn() {
-  const { firebaseConfig } = useLoaderData<typeof loader>();
-  const { auth } = useFirebase(firebaseConfig);
+  const auth = getAuth();
 
   const navigation = useNavigation();
   const navigate = useNavigate();

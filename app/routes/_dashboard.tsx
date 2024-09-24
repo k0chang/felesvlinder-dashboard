@@ -1,37 +1,20 @@
-import { LoaderFunctionArgs } from "@remix-run/cloudflare";
-import {
-  json,
-  Link,
-  Outlet,
-  useLoaderData,
-  useNavigate,
-} from "@remix-run/react";
-import { useEffect } from "react";
+import { Link, Outlet, redirect, useNavigate } from "@remix-run/react";
+import { getAuth } from "firebase/auth";
 import { Button } from "~/components/ui/button";
-import { useFirebase } from "~/hooks/use-firebase";
-import { firebaseConfigFromEnv } from "~/lib/firebase";
 
-export async function loader({ context }: LoaderFunctionArgs) {
-  return json({
-    firebaseConfig: firebaseConfigFromEnv(context.cloudflare.env),
-  });
+export async function clientLoader() {
+  const auth = getAuth();
+  if (!auth.currentUser) {
+    return redirect("/sign-in");
+  }
+  return null;
 }
 
 export default function Layout() {
-  const { firebaseConfig } = useLoaderData<typeof loader>();
-  const { auth, user } = useFirebase(firebaseConfig);
-
+  const auth = getAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!auth.currentUser) {
-      navigate("/sign-in");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
   return (
-    <div className={"flex grow flex-col bg-[#f1f1f1]"}>
+    <div className={"min-h-full flex grow flex-col bg-[#f1f1f1]"}>
       <div
         className={"flex items-center justify-between bg-black p-2 text-white"}
       >
@@ -43,13 +26,16 @@ export default function Layout() {
         <Button
           variant={"secondary"}
           type="button"
-          onClick={() => auth.signOut()}
+          onClick={async () => {
+            await auth.signOut();
+            navigate("/sign-in");
+          }}
         >
           ログアウト
         </Button>
       </div>
 
-      <div className={"relative m-[30px_50px] grow"}>
+      <div className={"m-[30px_50px] grow"}>
         <Outlet />
       </div>
     </div>

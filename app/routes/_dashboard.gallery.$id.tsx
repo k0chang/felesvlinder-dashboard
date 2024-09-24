@@ -1,7 +1,8 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { json, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
+import { json } from "@remix-run/cloudflare";
 import {
+  ClientLoaderFunctionArgs,
   Form,
   Link,
   useLoaderData,
@@ -19,6 +20,7 @@ import {
 import {
   deleteObject,
   getDownloadURL,
+  getStorage,
   ref,
   uploadBytes,
 } from "firebase/storage";
@@ -39,14 +41,12 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
-import { useFirebase } from "~/hooks/use-firebase";
 import { useToast } from "~/hooks/use-toast";
-import { firebaseConfigFromEnv } from "~/lib/firebase";
 import { cn } from "~/lib/utils";
 import { galleryFormSchema, gallerySchema } from "~/models/gallery";
 import { getImageFileMeta } from "~/utils/image";
 
-export async function loader({ params, context }: LoaderFunctionArgs) {
+export async function clientLoader({ params }: ClientLoaderFunctionArgs) {
   if (!params.id) {
     throw new Response("Not found", { status: 404 });
   }
@@ -57,25 +57,16 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
     throw new Response("Not found", { status: 404 });
   }
 
+  document.title = `${docSnap.data().title} | Gallery`;
+
   return json({
     gallery: gallerySchema.parse(docSnap.data()),
-    firebaseConfig: firebaseConfigFromEnv(context.cloudflare.env),
   });
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return [
-    {
-      title: data?.gallery.title
-        ? `📝 ${data.gallery.title} | Gallery`
-        : "📝 Gallery",
-    },
-  ];
-};
-
 export default function GalleryDetail() {
-  const { gallery, firebaseConfig } = useLoaderData<typeof loader>();
-  const { db, storage } = useFirebase(firebaseConfig);
+  const { gallery } = useLoaderData<typeof clientLoader>();
+  const [db, storage] = [getFirestore(), getStorage()];
 
   const navigation = useNavigation();
   const navigate = useNavigate();
