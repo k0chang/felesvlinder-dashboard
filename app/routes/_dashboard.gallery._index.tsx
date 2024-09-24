@@ -21,12 +21,17 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader() {
-  const db = getFirestore();
-  const q = query(collection(db, "gallery"), orderBy("updatedAt", "desc"));
-  const querySnapshot = await getDocs(q);
-  const data = querySnapshot.docs.map((doc) => doc.data());
+  try {
+    const db = getFirestore();
+    const q = query(collection(db, "gallery"), orderBy("updatedAt", "desc"));
+    const querySnapshot = await getDocs(q);
+    const data = querySnapshot.docs.map((doc) => doc.data());
 
-  return json({ gallery: gallerySchema.array().parse(data) });
+    return json({ gallery: gallerySchema.array().parse(data) });
+  } catch (error) {
+    console.error(error);
+    return json({ gallery: [] }, { status: 500 });
+  }
 }
 
 export default function Gallery() {
