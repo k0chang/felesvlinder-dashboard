@@ -1,11 +1,13 @@
-import type { LinksFunction } from "@remix-run/cloudflare";
-import { Outlet, Scripts } from "@remix-run/react";
+import {
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+} from "@remix-run/react";
 import { getApps, initializeApp } from "firebase/app";
-import stylesheet from "./tailwind.css?url";
-
-export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: stylesheet },
-];
+import { Toaster } from "./components/ui/toaster";
+import "./tailwind.css";
 
 export async function clientLoader() {
   // init firebase
@@ -23,6 +25,25 @@ export async function clientLoader() {
   return null;
 }
 
+export function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="ja-JP">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        {children}
+        <ScrollRestoration />
+        <Scripts />
+        <Toaster />
+      </body>
+    </html>
+  );
+}
+
 export function HydrateFallback() {
   return (
     <>
@@ -32,10 +53,5 @@ export function HydrateFallback() {
 }
 
 export default function App() {
-  return (
-    <>
-      <Scripts />
-      <Outlet />
-    </>
-  );
+  return <Outlet />;
 }
