@@ -111,7 +111,7 @@ export default function GalleryPost() {
       <div
         {...getRootProps()}
         className={cn(
-          "h-[500px] overflow-hidden rounded-md border border-dashed border-[#444444] mt-5",
+          "h-[300px] overflow-hidden border border-dashed border-[#444444] mt-5",
           isDragActive && "border-orange-600 bg-orange-100"
         )}
       >

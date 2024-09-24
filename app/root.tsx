@@ -6,6 +6,7 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import { getApps, initializeApp } from "firebase/app";
+import { LoadingView } from "./components/loading/loading-view";
 import { Toaster } from "./components/ui/toaster";
 import "./tailwind.css";
 
@@ -47,6 +48,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export function HydrateFallback() {
   return (
     <>
+      <LoadingView title="Loading..." />
       <Scripts />
     </>
   );

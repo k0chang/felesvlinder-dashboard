@@ -1,6 +1,8 @@
-import { Link, Outlet, redirect, useNavigate } from "@remix-run/react";
+import { NavLink, Outlet, redirect, useNavigate } from "@remix-run/react";
 import { getAuth } from "firebase/auth";
+import { PowerOff } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
 export async function clientLoader() {
   const auth = getAuth();
@@ -17,35 +19,54 @@ export default function Layout() {
     <div className={"min-h-screen flex grow flex-col bg-[#f1f1f1]"}>
       <div
         className={
-          "flex items-center justify-between bg-black p-2 text-white sticky top-0 z-10 drop-shadow-[0_4px_8px_rgba(0,0,0,0.598)] border-b-yellow-300 border-b-2"
+          "flex items-center justify-between bg-black p-2 text-white sticky top-0 z-10 drop-shadow-[0_4px_8px_rgba(0,0,0,0.598)] border-b-[#521416] border-b-2"
         }
       >
         <div className={"ml-2 flex gap-6"}>
-          <Link
+          <NavLink
             to={"/gallery"}
-            className="hover:text-blue-400 transition-colors"
+            className={({ isActive }) =>
+              cn(
+                "hover:text-[#521416] transition-colors",
+                isActive && "text-[#521416]"
+              )
+            }
           >
             GALLERY
-          </Link>
-          <Link to={"/about"} className="hover:text-blue-400 transition-colors">
+          </NavLink>
+          <NavLink
+            to={"/about"}
+            className={({ isActive }) =>
+              cn(
+                "hover:text-[#521416] transition-colors",
+                isActive && "text-[#521416]"
+              )
+            }
+          >
             ABOUT
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to={"/contact"}
-            className="hover:text-blue-400 transition-colors"
+            className={({ isActive }) =>
+              cn(
+                "hover:text-[#521416] transition-colors",
+                isActive && "text-[#521416]"
+              )
+            }
           >
             CONTACT
-          </Link>
+          </NavLink>
         </div>
         <Button
-          variant={"secondary"}
+          variant={"ghost"}
           type="button"
           onClick={async () => {
             await auth.signOut();
             navigate("/sign-in");
           }}
+          className="p-0 h-9 w-9 border border-white rounded-full hover:rounded-full hover:bg-transparent hover:border-red-500 [&_.lucide-power-off]:hover:text-red-500 [&_.lucide-power-off]:transition-colors [&_.lucide-power-off]:duration-100"
         >
-          ログアウト
+          <PowerOff size={16} />
         </Button>
       </div>
 

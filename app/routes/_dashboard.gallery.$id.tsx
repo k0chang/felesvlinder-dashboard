@@ -28,7 +28,6 @@ import { ChangeEvent, useState } from "react";
 import { useDropzone } from "react-dropzone-esm";
 import { LoadingView } from "~/components/loading/loading-view";
 import { Button, buttonVariants } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
   Dialog,
@@ -183,7 +182,7 @@ export default function GalleryDetail() {
   return (
     <Form {...getFormProps(form)}>
       <div className="mb-3 flex items-center gap-2">
-        <Button variant={"ghost"} asChild>
+        <Button variant={"ghost"} asChild className="p-3">
           <Link to={"/gallery"}>
             <ArrowLeft />
           </Link>
@@ -191,90 +190,88 @@ export default function GalleryDetail() {
         <p>一覧に戻る</p>
       </div>
 
-      <Card className="rounded-none p-7">
-        <h2 className="font-bold text-lg">Before</h2>
-        <div className="relative min-h-[500px] mb-4">
-          <img src={gallery.url} alt="Current" className="object-contain" />
-        </div>
+      <h2 className="font-bold text-lg">Before</h2>
+      <div className="relative min-h-[300px] mb-4">
+        <img src={gallery.url} alt="Current" className="object-contain" />
+      </div>
 
-        <h2 className="font-bold text-lg">After</h2>
-        <div
-          {...getRootProps()}
-          className={cn(
-            "relative w-full flex min-h-[500px] flex-col items-center justify-center gap-2 rounded-md border border-dashed border-[#444444]",
-            isDragActive && "border-orange-600 bg-orange-100"
+      <h2 className="font-bold text-lg">After</h2>
+      <div
+        {...getRootProps()}
+        className={cn(
+          "relative w-full flex min-h-[300px] flex-col items-center justify-center gap-2 border border-dashed border-[#444444]",
+          isDragActive && "border-orange-600 bg-orange-100"
+        )}
+      >
+        <div>
+          {!file && <p>ドラッグ&ドロップも可能</p>}
+          {file && (
+            <img
+              src={URL.createObjectURL(file)}
+              alt="preview"
+              className="object-contain"
+            />
           )}
-        >
-          <div>
-            {!file && <p>ドラッグ&ドロップも可能</p>}
-            {file && (
-              <img
-                src={URL.createObjectURL(file)}
-                alt="preview"
-                className="object-contain"
-              />
-            )}
-            <Input {...getDropzoneInputProps()} onChange={onChange} />
-          </div>
+          <Input {...getDropzoneInputProps()} onChange={onChange} />
         </div>
+      </div>
 
-        <label
-          htmlFor={field.inSlideView.name}
-          className="my-3 flex items-center"
-        >
-          <Checkbox
-            defaultChecked={!!field.inSlideView.value}
-            name={field.inSlideView.name}
-            id={field.inSlideView.name}
-            className="size-10 mr-2"
-          />
-          スライドビューに表示する
-        </label>
-        <p className="text-red-600 text-sm">{field.inSlideView.errors?.[0]}</p>
-
-        <Input
-          {...getInputProps(field.title, { type: "text" })}
-          placeholder="title"
+      <label
+        htmlFor={field.inSlideView.name}
+        className="my-3 flex items-center"
+      >
+        <Checkbox
+          defaultChecked={!!field.inSlideView.value}
+          name={field.inSlideView.name}
+          id={field.inSlideView.name}
+          className="size-10 mr-2"
         />
-        <p className="text-red-600 text-sm mb-3">{field.title.errors?.[0]}</p>
-        <Input
-          {...getInputProps(field.description, { type: "text" })}
-          placeholder="description"
-        />
+        スライドビューに表示する
+      </label>
+      <p className="text-red-600 text-sm">{field.inSlideView.errors?.[0]}</p>
 
-        <div className="mt-5 flex justify-end gap-3">
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger
-              type="button"
-              className={buttonVariants({ variant: "destructive" })}
-            >
-              削除
-            </DialogTrigger>
-            <DialogContent className="font-serif">
-              <DialogHeader>
-                <DialogTitle>確認</DialogTitle>
-                <DialogDescription />
-              </DialogHeader>
-              <div>
-                <p>本当に？</p>
-                <div className="mt-6 flex justify-end gap-4">
-                  <DialogClose asChild>
-                    <Button type="button" variant="secondary">
-                      キャンセル
-                    </Button>
-                  </DialogClose>
-                  <Button variant="destructive" onClick={handleDelete}>
-                    確定
+      <Input
+        {...getInputProps(field.title, { type: "text" })}
+        placeholder="title"
+      />
+      <p className="text-red-600 text-sm mb-3">{field.title.errors?.[0]}</p>
+      <Input
+        {...getInputProps(field.description, { type: "text" })}
+        placeholder="description"
+      />
+
+      <div className="mt-5 flex justify-end gap-3">
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger
+            type="button"
+            className={buttonVariants({ variant: "destructive" })}
+          >
+            削除
+          </DialogTrigger>
+          <DialogContent className="font-serif">
+            <DialogHeader>
+              <DialogTitle>確認</DialogTitle>
+              <DialogDescription />
+            </DialogHeader>
+            <div>
+              <p>本当に？</p>
+              <div className="mt-6 flex justify-end gap-4">
+                <DialogClose asChild>
+                  <Button type="button" variant="secondary">
+                    キャンセル
                   </Button>
-                </div>
+                </DialogClose>
+                <Button variant="destructive" onClick={handleDelete}>
+                  確定
+                </Button>
               </div>
-            </DialogContent>
-          </Dialog>
-          <Button disabled={!form.valid || navigation.state === "submitting"}>
-            保存
-          </Button>
-        </div>
-      </Card>
+            </div>
+          </DialogContent>
+        </Dialog>
+        <Button disabled={!form.valid || navigation.state === "submitting"}>
+          保存
+        </Button>
+      </div>
       {navigation.state === "submitting" && <LoadingView title="送信中" />}
     </Form>
   );
