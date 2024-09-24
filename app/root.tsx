@@ -1,6 +1,11 @@
+import type { LinksFunction } from "@remix-run/cloudflare";
 import { Outlet, Scripts } from "@remix-run/react";
 import { getApps, initializeApp } from "firebase/app";
-import "./tailwind.css";
+import stylesheet from "./tailwind.css?url";
+
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: stylesheet },
+];
 
 export async function clientLoader() {
   // init firebase
