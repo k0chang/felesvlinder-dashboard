@@ -15,8 +15,16 @@ pages_build_output_dir = "./build/client"
 # - https://developers.cloudflare.com/pages/functions/bindings/#environment-variables
 # Note: Use secrets to store sensitive data.
 # - https://developers.cloudflare.com/pages/functions/bindings/#secrets
-# [vars]
-# MY_VARIABLE = "production_value"
+[vars]
+FIREBASE_API_KEY = "AIzaSyAdxwQFN46Gq5YqGUjW6dLONR2V53R5OT4"
+FIREBASE_AUTH_DOMAIN = "felesvlinder-7e64a.firebaseapp.com"
+FIREBASE_PROJECT_ID = "felesvlinder-7e64a"
+FIREBASE_STORAGE_BUCKET = "felesvlinder-7e64a.appspot.com"
+FIREBASE_MESSAGING_SENDER_ID = "815094624385"
+FIREBASE_APP_ID = "1:815094624385:web:5907fbc21441be7360dd80"
+FIREBASE_RECAPTCHA_SITE_KEY = "6LeEvxwpAAAAAEGWOBfQPcjNQ7WJsiuBcEjnqXm5"
+GOOGLE_ANALYTICS_ID = "G-56X1T5C2Y3"
+PUBLIC_URL = "https://felesvlinder.com"
 
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
 # Docs: https://developers.cloudflare.com/pages/functions/bindings/#workers-ai
