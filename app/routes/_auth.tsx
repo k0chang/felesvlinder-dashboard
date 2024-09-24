@@ -12,7 +12,7 @@ export async function clientLoader() {
 // 認証系共通のレイアウト
 export default function Layout() {
   return (
-    <div className="h-full flex justify-center items-center py-7">
+    <div className="h-screen flex justify-center items-center py-7">
       <div className="w-56 mx-auto">
         <Outlet />
       </div>

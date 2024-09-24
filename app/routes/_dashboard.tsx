@@ -14,7 +14,7 @@ export default function Layout() {
   const auth = getAuth();
   const navigate = useNavigate();
   return (
-    <div className={"min-h-full flex grow flex-col bg-[#f1f1f1]"}>
+    <div className={"min-h-screen flex grow flex-col bg-[#f1f1f1]"}>
       <div
         className={
           "flex items-center justify-between bg-black p-2 text-white sticky top-0 z-10 drop-shadow-[0_4px_8px_rgba(0,0,0,0.598)] border-b-yellow-300 border-b-2"
