@@ -1,3 +1,4 @@
+import { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import {
   Links,
   Meta,
@@ -5,8 +6,18 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import { getApps, initializeApp } from "firebase/app";
 import { Toaster } from "./components/ui/toaster";
+import { firebaseConfigFromEnv } from "./lib/firebase";
 import "./tailwind.css";
+
+export async function loader({ context }: LoaderFunctionArgs) {
+  // init firebase
+  if (!getApps().length) {
+    initializeApp(firebaseConfigFromEnv(context.cloudflare.env));
+  }
+  return null;
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
