@@ -1,4 +1,4 @@
-import { NavLink, Outlet, redirect, useNavigate } from "@remix-run/react";
+import { Link, NavLink, Outlet, redirect, useNavigate } from "@remix-run/react";
 import { getAuth } from "firebase/auth";
 import { PowerOff } from "lucide-react";
 import { Button } from "~/components/ui/button";
@@ -57,17 +57,32 @@ export default function Layout() {
             CONTACT
           </NavLink>
         </div>
-        <Button
-          variant={"ghost"}
-          type="button"
-          onClick={async () => {
-            await auth.signOut();
-            navigate("/sign-in");
-          }}
-          className="p-0 h-9 w-9 border border-white rounded-full hover:rounded-full hover:bg-transparent hover:border-red-500 [&_.lucide-power-off]:hover:text-red-500 [&_.lucide-power-off]:transition-colors [&_.lucide-power-off]:duration-100"
-        >
-          <PowerOff size={16} />
-        </Button>
+        <div className="h-10 flex items-center gap-8">
+          <Link
+            to={"https://felesvlinder.com"}
+            target="_blank"
+            rel="noreferrer"
+            className="size-7 relative [&>#overlay]:bg-transparent [&>#overlay]:hover:bg-white [&>#overlay]:transition-colors"
+          >
+            <div id="overlay" className="absolute size-full" />
+            <img
+              src="/public-tonan.jpg"
+              alt="public site link"
+              className="object-cover size-full mix-blend-difference"
+            />
+          </Link>
+          <Button
+            variant={"ghost"}
+            type="button"
+            onClick={async () => {
+              await auth.signOut();
+              navigate("/sign-in");
+            }}
+            className="p-0 h-9 w-9 border border-white rounded-full hover:rounded-full hover:bg-transparent hover:border-red-500 [&_.lucide-power-off]:hover:text-red-500 [&_.lucide-power-off]:transition-colors [&_.lucide-power-off]:duration-100"
+          >
+            <PowerOff size={16} />
+          </Button>
+        </div>
       </div>
 
       <div className={"m-[30px_50px] grow"}>
