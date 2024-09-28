@@ -3,14 +3,14 @@ import { parseWithZod } from "@conform-to/zod";
 import { Form, useNavigate, useNavigation } from "@remix-run/react";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import { FileRejection, useDropzone } from "react-dropzone-esm";
+import { DnD } from "~/components/dnd";
 import { LoadingView } from "~/components/loading/loading-view";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { useToast } from "~/hooks/use-toast";
-import { cn } from "~/lib/utils";
 import { galleryFormSchema, GalleryPayload } from "~/models/gallery";
 import { getImageFileMeta } from "~/utils/image";
 
@@ -90,11 +90,6 @@ export default function GalleryPost() {
     setFile(acceptedFiles[0]);
   };
 
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) return;
-    setFile(e.target.files[0]);
-  };
-
   const {
     getInputProps: getDropzoneInputProps,
     getRootProps,
@@ -108,25 +103,13 @@ export default function GalleryPost() {
   return (
     <Form {...getFormProps(form)}>
       <h1>新規投稿</h1>
-      <div
-        {...getRootProps()}
-        className={cn(
-          "h-[300px] overflow-hidden border border-dashed border-[#444444] mt-5",
-          isDragActive && "border-orange-600 bg-orange-100"
-        )}
-      >
-        <div className="h-full flex items-center justify-center">
-          {!file && <p>ドラッグ&ドロップも可能</p>}
-          {file && (
-            <img
-              src={URL.createObjectURL(file)}
-              alt="preview"
-              className="object-contain max-h-full"
-            />
-          )}
-          <Input onChange={onChange} {...getDropzoneInputProps()} />
-        </div>
-      </div>
+      <DnD
+        rootProps={getRootProps()}
+        inputProps={getDropzoneInputProps()}
+        isDragActive={isDragActive}
+        file={file}
+        onFileChange={setFile}
+      />
       {fieldError.file && <p className="text-red-500">{fieldError.file}</p>}
 
       <label

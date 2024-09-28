@@ -2,8 +2,12 @@ import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
 import { Form, useNavigate, useNavigation } from "@remix-run/react";
 import { FirebaseError } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -25,6 +29,15 @@ export default function SignIn() {
 
   const navigation = useNavigation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate("/");
+      }
+    });
+    return unsubscribe;
+  }, [auth, navigate]);
 
   const [signInError, setSignInError] = useState<string | null>(null);
   const [form, field] = useForm({

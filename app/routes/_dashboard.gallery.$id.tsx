@@ -24,8 +24,9 @@ import {
   uploadBytes,
 } from "firebase/storage";
 import { ArrowLeft } from "lucide-react";
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import { useDropzone } from "react-dropzone-esm";
+import { DnD } from "~/components/dnd";
 import { LoadingView } from "~/components/loading/loading-view";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -40,7 +41,6 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { useToast } from "~/hooks/use-toast";
-import { cn } from "~/lib/utils";
 import { galleryFormSchema, gallerySchema } from "~/models/gallery";
 import { getImageFileMeta } from "~/utils/image";
 
@@ -146,11 +146,6 @@ export default function GalleryDetail() {
     setFile(acceptedFiles[0]);
   };
 
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) return;
-    setFile(e.target.files[0]);
-  };
-
   const {
     getInputProps: getDropzoneInputProps,
     getRootProps,
@@ -196,25 +191,13 @@ export default function GalleryDetail() {
       </div>
 
       <h2 className="font-bold text-lg">After</h2>
-      <div
-        {...getRootProps()}
-        className={cn(
-          "relative w-full flex min-h-[300px] flex-col items-center justify-center gap-2 border border-dashed border-[#444444]",
-          isDragActive && "border-orange-600 bg-orange-100"
-        )}
-      >
-        <div>
-          {!file && <p>ドラッグ&ドロップも可能</p>}
-          {file && (
-            <img
-              src={URL.createObjectURL(file)}
-              alt="preview"
-              className="object-contain"
-            />
-          )}
-          <Input {...getDropzoneInputProps()} onChange={onChange} />
-        </div>
-      </div>
+      <DnD
+        rootProps={getRootProps()}
+        inputProps={getDropzoneInputProps()}
+        isDragActive={isDragActive}
+        file={file}
+        onFileChange={setFile}
+      />
 
       <label
         htmlFor={field.inSlideView.name}
