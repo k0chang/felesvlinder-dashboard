@@ -53,6 +53,7 @@ export default function Layout() {
           </div>
           <div className="h-10 flex items-center gap-8">
             <Link
+              title="Visit public site"
               to={"https://felesvlinder.com"}
               target="_blank"
               rel="noreferrer"
@@ -66,6 +67,7 @@ export default function Layout() {
               />
             </Link>
             <Button
+              title="Sign out"
               variant={"ghost"}
               type="button"
               onClick={async () => {
