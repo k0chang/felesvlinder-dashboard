@@ -13,13 +13,6 @@ export function Leaf({ attributes, children, leaf }: RenderLeafProps) {
   if (leaf.underline) {
     children = <u>{children}</u>;
   }
-  if (leaf.link) {
-    children = (
-      <a href={leaf.href} className="text-[#a10005]">
-        {children}
-      </a>
-    );
-  }
 
   return <span {...attributes}>{children}</span>;
 }

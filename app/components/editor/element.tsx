@@ -19,7 +19,7 @@ export function Element({ attributes, children, element }: RenderElementProps) {
         <h1
           {...attributes}
           id={element.children[0].text}
-          className="font-bold text-2xl"
+          className="font-bold text-4xl py-3"
         >
           {children}
         </h1>
@@ -29,7 +29,7 @@ export function Element({ attributes, children, element }: RenderElementProps) {
         <h2
           {...attributes}
           id={element.children[0].text}
-          className="font-bold text-xl"
+          className="font-bold text-2xl"
         >
           {children}
         </h2>
@@ -39,7 +39,7 @@ export function Element({ attributes, children, element }: RenderElementProps) {
         <h3
           {...attributes}
           id={element.children[0].text}
-          className="font-bold text-lg"
+          className="font-bold text-xl"
         >
           {children}
         </h3>
@@ -57,6 +57,12 @@ export function Element({ attributes, children, element }: RenderElementProps) {
         <ol {...attributes} className="list-decimal pl-5">
           {children}
         </ol>
+      );
+    case "link":
+      return (
+        <a {...attributes} className="text-[#a10005]">
+          {children}
+        </a>
       );
     default:
       return <p {...attributes}>{children}</p>;

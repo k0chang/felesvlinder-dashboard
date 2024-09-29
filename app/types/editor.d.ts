@@ -1,25 +1,25 @@
-import { BaseEditor } from "slate";
+import { BaseEditor, Descendant } from "slate";
 import { HistoryEditor } from "slate-history";
 import { ReactEditor } from "slate-react";
 
 export type ParagraphElement = {
   type: "paragraph";
-  children: CustomText[];
+  children: Descendant[];
 };
 
 export type BoldElement = {
   type: "bold";
-  children: CustomText[];
+  children: Descendant[];
 };
 
 export type ItalicElement = {
   type: "italic";
-  children: CustomText[];
+  children: Descendant[];
 };
 
 export type UnderlineElement = {
   type: "underline";
-  children: CustomText[];
+  children: Descendant[];
 };
 
 export type HeadingElement = {
@@ -30,22 +30,22 @@ export type HeadingElement = {
 export type LinkElement = {
   type: "link";
   url: string;
-  children: CustomText[];
+  children: Descendant[];
 };
 
 export type ListElement = {
   type: "bulleted-list" | "numbered-list";
-  children: CustomText[];
+  children: Descendant[];
 };
 
 export type ListItemElement = {
   type: "list-item";
-  children: CustomText[];
+  children: Descendant[];
 };
 
 export type CodeElement = {
   type: "code";
-  children: CustomText[];
+  children: Descendant[];
 };
 
 type CustomElement =
@@ -61,13 +61,10 @@ type CustomElement =
 
 type CustomText = {
   text: string;
-  children?: CustomText[];
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
   code?: boolean;
-  link?: boolean;
-  href?: string;
 };
 
 declare module "slate" {

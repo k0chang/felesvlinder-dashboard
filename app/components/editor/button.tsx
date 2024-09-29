@@ -3,6 +3,7 @@ import { Editor, Element as SlateElement, Transforms } from "slate";
 import { useSlate } from "slate-react";
 import { cn } from "~/lib/utils";
 import { CustomElement } from "~/types/editor";
+import { unwrapLink, wrapLink } from ".";
 import { Icon } from "./icon";
 
 export const Button = forwardRef<
@@ -30,7 +31,7 @@ export const Button = forwardRef<
 ));
 Button.displayName = "Button";
 
-export const MarkButton = ({ format }: { format: CustomElement["type"] }) => {
+export function MarkButton({ format }: { format: CustomElement["type"] }) {
   const editor = useSlate();
   return (
     <Button
@@ -43,14 +44,60 @@ export const MarkButton = ({ format }: { format: CustomElement["type"] }) => {
       <Icon type={format}></Icon>
     </Button>
   );
+}
+
+export function AddLinkButton() {
+  const editor = useSlate();
+  return (
+    <Button
+      active={isLinkActive(editor)}
+      onMouseDown={(event) => {
+        event.preventDefault();
+        const url = window.prompt("Enter the URL of the link:");
+        if (!url) return;
+        insertLink(editor, url);
+      }}
+    >
+      <Icon type="link" />
+    </Button>
+  );
+}
+
+export function RemoveLinkButton() {
+  const editor = useSlate();
+  return (
+    <Button
+      active={isLinkActive(editor)}
+      onMouseDown={(event) => {
+        event.preventDefault();
+        unwrapLink(editor);
+      }}
+    >
+      <Icon type="unlink" />
+    </Button>
+  );
+}
+
+const insertLink = (editor: Editor, url: string) => {
+  if (editor.selection) {
+    wrapLink(editor, url);
+  }
 };
 
-export const isMarkActive = (editor: Editor, format: string) => {
+export const isLinkActive = (editor: Editor) => {
+  const [link] = Editor.nodes(editor, {
+    match: (n) =>
+      !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === "link",
+  });
+  return !!link;
+};
+
+export const isMarkActive = (editor: Editor, format: CustomElement["type"]) => {
   const marks: Record<string, unknown> | null = Editor.marks(editor);
   return marks ? marks[format] === true : false;
 };
 
-export const toggleMark = (editor: Editor, format: string) => {
+export const toggleMark = (editor: Editor, format: CustomElement["type"]) => {
   const isActive = isMarkActive(editor, format);
 
   if (isActive) {
@@ -70,7 +117,7 @@ export function BlockButton({ format }: { format: CustomElement["type"] }) {
         toggleBlock(editor, format);
       }}
     >
-      <Icon type={format}></Icon>
+      <Icon type={format} />
     </Button>
   );
 }
@@ -114,7 +161,10 @@ export const toggleBlock = (editor: Editor, format: CustomElement["type"]) => {
   Transforms.setNodes<SlateElement>(editor, newProperties);
 
   if (!isActive && isList) {
-    const block = { type: format, children: [] };
+    const block: CustomElement = {
+      type: format as Exclude<CustomElement["type"], "link">,
+      children: [{ text: "" }],
+    };
     Transforms.wrapNodes(editor, block);
   }
 };

@@ -1,6 +1,13 @@
 import isHotkey from "is-hotkey";
 import { useCallback, useMemo } from "react";
-import { createEditor, Descendant, Transforms } from "slate";
+import {
+  createEditor,
+  Descendant,
+  Editor,
+  Range,
+  Element as SlateElement,
+  Transforms,
+} from "slate";
 import { withHistory } from "slate-history";
 import {
   Editable,
@@ -9,8 +16,16 @@ import {
   Slate,
   withReact,
 } from "slate-react";
+import { z } from "zod";
 import { cn } from "~/lib/utils";
-import { BlockButton, isMarkActive, MarkButton, toggleMark } from "./button";
+import { LinkElement } from "~/types/editor";
+import {
+  AddLinkButton,
+  BlockButton,
+  MarkButton,
+  RemoveLinkButton,
+  toggleMark,
+} from "./button";
 import { Element } from "./element";
 import { Leaf } from "./leaf";
 import { Toolbar } from "./toolbar";
@@ -33,6 +48,9 @@ const HOTKEYS = {
 } as const;
 
 export function RichTextEditor({ initialValue, classNames, onChange }: Props) {
+  // const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
+  // const [linkUrl, setLinkUrl] = useState("");
+
   const renderElement = useCallback(
     (props: RenderElementProps) => <Element {...props} />,
     []
@@ -41,36 +59,21 @@ export function RichTextEditor({ initialValue, classNames, onChange }: Props) {
     (props: RenderLeafProps) => <Leaf {...props} />,
     []
   );
-  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+  const editor = useMemo(
+    () => withInlines(withHistory(withReact(createEditor()))),
+    []
+  );
 
   return (
-    <Slate
-      editor={editor}
-      initialValue={initialValue}
-      onChange={(val) => {
-        if (isMarkActive(editor, "link")) {
-          const selection = editor.selection;
-          if (selection) {
-            const link = window.prompt("Enter the URL of the link:");
-            if (link) {
-              Transforms.wrapNodes(
-                editor,
-                { type: "link", url: link, children: [] },
-                { at: selection }
-              );
-            }
-          }
-        }
-        onChange(val);
-      }}
-    >
+    <Slate editor={editor} initialValue={initialValue} onChange={onChange}>
       <div className={classNames?.root}>
         <Toolbar className={classNames?.toolbar}>
           <MarkButton format="bold" />
           <MarkButton format="italic" />
           <MarkButton format="underline" />
           <MarkButton format="code" />
-          <MarkButton format="link" />
+          <AddLinkButton />
+          <RemoveLinkButton />
           <BlockButton format="heading-1" />
           <BlockButton format="heading-2" />
           <BlockButton format="heading-3" />
@@ -99,7 +102,106 @@ export function RichTextEditor({ initialValue, classNames, onChange }: Props) {
             classNames?.editor
           )}
         />
+        {/* <Popover open={true} onOpenChange={setLinkPopoverOpen}>
+          <PopoverContent>
+            <Input
+              placeholder="URL"
+              onChange={(val) => setLinkUrl(val.target.value)}
+            />
+            <Button
+              onClick={() => {
+                setLinkPopoverOpen(false);
+                toggleMark(editor, "link");
+              }}
+            >
+              決定
+            </Button>
+          </PopoverContent>
+        </Popover> */}
       </div>
     </Slate>
   );
 }
+
+const isUrl = (text: string): boolean =>
+  z.string().url().safeParse(text).success;
+
+const withInlines = (editor: Editor) => {
+  const { insertData, insertText, isInline } = editor;
+
+  editor.isInline = (element) =>
+    ["link"].includes(element.type) || isInline(element);
+
+  editor.insertText = (text) => {
+    if (text && isUrl(text)) {
+      wrapLink(editor, text);
+    } else {
+      insertText(text);
+    }
+  };
+
+  editor.insertText = (text) => {
+    if (text && isUrl(text)) {
+      wrapLink(editor, text);
+    } else {
+      insertText(text);
+    }
+  };
+
+  editor.insertData = (data) => {
+    const text = data.getData("text/plain");
+
+    if (text && isUrl(text)) {
+      wrapLink(editor, text);
+    } else {
+      insertData(data);
+    }
+  };
+
+  return editor;
+};
+
+const isLinkActive = (editor: Editor) => {
+  const [link] = Editor.nodes(editor, {
+    match: (n) =>
+      !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === "link",
+  });
+  return !!link;
+};
+
+export const unwrapLink = (editor: Editor) => {
+  const { selection } = editor;
+  if (!selection) return;
+  Transforms.unwrapNodes<LinkElement>(editor, {
+    split: true,
+    match: (n) => {
+      return (
+        !Editor.isEditor(n) &&
+        SlateElement.isElement(n) &&
+        n.type === "link" &&
+        Range.isCollapsed(selection)
+      );
+    },
+  });
+};
+
+export const wrapLink = (editor: Editor, url: string) => {
+  if (isLinkActive(editor)) {
+    unwrapLink(editor);
+  }
+
+  const { selection } = editor;
+  const isCollapsed = selection && Range.isCollapsed(selection);
+  const link: LinkElement = {
+    type: "link",
+    url,
+    children: [{ text: isCollapsed ? url : "" }],
+  };
+
+  if (isCollapsed) {
+    Transforms.insertNodes(editor, link, { at: selection });
+  } else {
+    Transforms.wrapNodes(editor, link, { split: true });
+    Transforms.collapse(editor, { edge: "end" });
+  }
+};
