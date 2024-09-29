@@ -1,12 +1,24 @@
-import { json, useLoaderData } from "@remix-run/react";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
-import { getDownloadURL, getStorage, ref } from "firebase/storage";
-import { useState } from "react";
+import { Form, json, useLoaderData } from "@remix-run/react";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale/ja";
+import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
+import {
+  deleteObject,
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytes,
+} from "firebase/storage";
+import { PencilLine } from "lucide-react";
+import { FormEvent, useState } from "react";
 import { useDropzone } from "react-dropzone-esm";
 import { Descendant } from "slate";
 import { DnD } from "~/components/dnd";
 import { RichTextEditor } from "~/components/editor";
-import { aboutSchema } from "~/models/about";
+import { LoadingView } from "~/components/loading/loading-view";
+import { Button } from "~/components/ui/button";
+import { useToast } from "~/hooks/use-toast";
+import { type About, aboutSchema } from "~/models/about";
 
 export async function clientLoader() {
   document.title = "About | FELESVLINDER";
@@ -22,8 +34,8 @@ export async function clientLoader() {
   const storage = getStorage();
   const imageRef = ref(
     storage,
-    `gs://${import.meta.env.VITE_FIREBASE_STORAGE_BUCKET}/images/${
-      result.data.icon_url
+    `gs://${import.meta.env.VITE_FIREBASE_STORAGE_BUCKET}/${
+      result.data.icon_object_path
     }`
   );
   const url = await getDownloadURL(imageRef);
@@ -41,6 +53,10 @@ export default function About() {
   );
   const [file, setFile] = useState<File | null>(null);
 
+  const { toast } = useToast();
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const onDrop = (acceptedFiles: File[]) => {
     setFile(acceptedFiles[0]);
   };
@@ -50,9 +66,51 @@ export default function About() {
     accept: { "image/*": [] },
   });
 
+  async function onSubmit(event: FormEvent) {
+    event.preventDefault();
+    try {
+      setIsSubmitting(true);
+      const payload: About = {
+        ...about,
+        profile: JSON.stringify(profileContent),
+        works: JSON.stringify(worksContent),
+      };
+      if (file) {
+        const storage = getStorage();
+        const storageRef = ref(storage, `images/profile/${file.name}`);
+        const deleteRef = ref(storage, about.icon_object_path);
+        const uploadResult = await uploadBytes(storageRef, file);
+        // 前のアイコンを削除
+        await deleteObject(deleteRef);
+        payload.icon_object_path = uploadResult.metadata.fullPath;
+      }
+      const db = getFirestore();
+      const now = Date.now();
+      payload.updated_at = now;
+      payload.created_at = about.created_at ?? now;
+      await setDoc(doc(db, "about", "v2"), payload);
+      toast({ title: "保存しました", className: "bg-green-500 text-white" });
+    } catch (e) {
+      toast({
+        title: "保存に失敗しました",
+        className: "bg-red-500 text-white",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
-    <>
-      <h1 className="font-bold text-3xl">About</h1>
+    <Form onSubmit={onSubmit}>
+      <h1 className="font-bold text-3xl inline-flex w-full justify-between items-center border-black border-b-[1px] pb-3">
+        About{" "}
+        {about.updated_at && (
+          <span className="text-amber-950 flex gap-2 text-sm">
+            <PencilLine size={20} />
+            {format(about.updated_at, "yyyy/MM/dd - HH:mm", { locale: ja })}
+          </span>
+        )}
+      </h1>
 
       <h2 className="font-bold text-lg mt-5">アイコンを変更する</h2>
       <img src={icon} alt="" className="size-[100px] mt-3" />
@@ -82,6 +140,17 @@ export default function About() {
           classNames={{ root: "mt-5" }}
         />
       </div>
-    </>
+
+      <Button
+        className={
+          "sticky text-white bottom-7 left-1/2 mt-8 w-1/2 -translate-x-1/2 bg-[#00000096]"
+        }
+        type="submit"
+      >
+        Submit
+      </Button>
+
+      {isSubmitting && <LoadingView title="送信中..." />}
+    </Form>
   );
 }

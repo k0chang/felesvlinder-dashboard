@@ -10,9 +10,15 @@ export function Element({ attributes, children, element }: RenderElementProps) {
       );
     case "bulleted-list":
       return (
-        <ul {...attributes} className="list-disc pl-5">
+        <ul {...attributes} className="list-disc pl-5 flex flex-col gap-1">
           {children}
         </ul>
+      );
+    case "numbered-list":
+      return (
+        <ol {...attributes} className="list-decimal pl-5 flex flex-col gap-1">
+          {children}
+        </ol>
       );
     case "heading-1":
       return (
@@ -52,15 +58,9 @@ export function Element({ attributes, children, element }: RenderElementProps) {
       return <h6 {...attributes}>{children}</h6>;
     case "list-item":
       return <li {...attributes}>{children}</li>;
-    case "numbered-list":
-      return (
-        <ol {...attributes} className="list-decimal pl-5">
-          {children}
-        </ol>
-      );
     case "link":
       return (
-        <a {...attributes} className="text-[#a10005]">
+        <a {...attributes} href={element.url} className="text-[#a10005]">
           {children}
         </a>
       );

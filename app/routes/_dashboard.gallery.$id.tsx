@@ -8,6 +8,7 @@ import {
   useNavigate,
   useNavigation,
 } from "@remix-run/react";
+import { format } from "date-fns";
 import { FirebaseError } from "firebase/app";
 import {
   deleteDoc,
@@ -23,7 +24,7 @@ import {
   ref,
   uploadBytes,
 } from "firebase/storage";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, PencilLine } from "lucide-react";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone-esm";
 import { DnD } from "~/components/dnd";
@@ -184,10 +185,25 @@ export default function GalleryDetail() {
         </Button>
         <p>一覧に戻る</p>
       </div>
+      <div className="my-8">
+        <h1 className="font-bold text-3xl inline-flex w-full justify-between items-center border-black border-b-[1px] pb-3">
+          {gallery.title}
+          {gallery.updatedAt && (
+            <span className="text-amber-950 flex gap-2 text-sm">
+              <PencilLine size={20} />
+              {format(gallery.updatedAt, "yyyy/MM/dd - HH:mm")}
+            </span>
+          )}
+        </h1>
+      </div>
 
       <h2 className="font-bold text-lg">Before</h2>
-      <div className="relative min-h-[300px] mb-4">
-        <img src={gallery.url} alt="Current" className="object-contain" />
+      <div className="flex justify-center min-h-[300px] mb-4">
+        <img
+          src={gallery.url}
+          alt="Current"
+          className="object-contain max-h-[500px]"
+        />
       </div>
 
       <h2 className="font-bold text-lg">After</h2>

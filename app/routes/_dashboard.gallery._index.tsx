@@ -26,7 +26,6 @@ export async function clientLoader() {
 
   return json({ gallery: result.data });
 }
-clientLoader.hydrate = true;
 
 export default function Gallery() {
   const { gallery } = useLoaderData<typeof clientLoader>();
@@ -38,7 +37,7 @@ export default function Gallery() {
           <Link to={"/gallery/post"}>新規作成</Link>
         </Button>
       </div>
-      <div className="flex flex-col gap-3 p-0">
+      <div className="grid gap-3 p-0 md:grid-cols-2 lg:grid-cols-3">
         {gallery.map((g, i) => (
           <Link
             key={i}

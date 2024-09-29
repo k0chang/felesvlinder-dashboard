@@ -123,7 +123,7 @@ export function RichTextEditor({ initialValue, classNames, onChange }: Props) {
   );
 }
 
-const isUrl = (text: string): boolean =>
+export const isUrl = (text: string): boolean =>
   z.string().url().safeParse(text).success;
 
 const withInlines = (editor: Editor) => {

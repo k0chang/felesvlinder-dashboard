@@ -1,4 +1,5 @@
-import { ChangeEvent } from "react";
+import { Upload } from "lucide-react";
+import { ChangeEvent, ReactNode } from "react";
 import { DropzoneInputProps, DropzoneRootProps } from "react-dropzone-esm";
 import { cn } from "~/lib/utils";
 import { Input } from "../ui/input";
@@ -9,7 +10,7 @@ type Props = {
   isDragActive: boolean;
   file: File | null;
   onFileChange: (file: File) => void;
-  placeholder?: string;
+  placeholder?: ReactNode;
   className?: string;
 };
 
@@ -17,7 +18,12 @@ export function DnD({
   rootProps,
   inputProps,
   isDragActive,
-  placeholder = "ドラッグ & ドロップも可能",
+  placeholder = (
+    <>
+      <Upload size={20} />
+      <span>ドラッグ & ドロップも可能</span>
+    </>
+  ),
   file,
   onFileChange,
   className,
@@ -36,7 +42,7 @@ export function DnD({
       )}
     >
       <div className="h-full flex items-center justify-center">
-        {!file && <p className="text-gray-500">{placeholder}</p>}
+        {!file && <p className="text-gray-500 flex gap-2">{placeholder}</p>}
         {file && (
           <img
             src={URL.createObjectURL(file)}

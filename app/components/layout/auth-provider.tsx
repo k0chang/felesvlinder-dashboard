@@ -16,7 +16,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         navigate("/sign-in");
       }
     });
-    return unsubscribe;
+    return () => unsubscribe();
   }, [auth, navigate]);
 
   return <AuthContext.Provider value={user}>{children}</AuthContext.Provider>;
