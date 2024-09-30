@@ -1,4 +1,4 @@
-import { ComponentProps, forwardRef, MouseEvent, PointerEvent } from "react";
+import { ComponentProps, forwardRef, MouseEvent } from "react";
 import { Editor, Element as SlateElement, Transforms } from "slate";
 import { useSlate } from "slate-react";
 import { cn } from "~/lib/utils";
@@ -49,7 +49,7 @@ export function MarkButton({ format }: { format: CustomElement["type"] }) {
 export function AddLinkButton() {
   const editor = useSlate();
 
-  function handleEvent(event: MouseEvent | PointerEvent) {
+  function handleEvent(event: MouseEvent) {
     event.preventDefault();
     const url = window.prompt("埋め込むURLを入力");
     if (!url) return;
@@ -57,11 +57,7 @@ export function AddLinkButton() {
   }
 
   return (
-    <Button
-      active={isLinkActive(editor)}
-      onMouseDown={handleEvent}
-      onPointerDown={handleEvent}
-    >
+    <Button active={isLinkActive(editor)} onClick={handleEvent}>
       <Icon type="link" />
     </Button>
   );
@@ -69,14 +65,14 @@ export function AddLinkButton() {
 
 export function RemoveLinkButton() {
   const editor = useSlate();
+
+  function handleEvent(event: MouseEvent) {
+    event.preventDefault();
+    unwrapLink(editor);
+  }
+
   return (
-    <Button
-      active={isLinkActive(editor)}
-      onMouseDown={(event) => {
-        event.preventDefault();
-        unwrapLink(editor);
-      }}
-    >
+    <Button active={isLinkActive(editor)} onClick={handleEvent}>
       <Icon type="unlink" />
     </Button>
   );
