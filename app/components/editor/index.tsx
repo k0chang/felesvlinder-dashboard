@@ -1,5 +1,5 @@
 import isHotkey from "is-hotkey";
-import { useCallback, useMemo } from "react";
+import { KeyboardEvent, useCallback, useMemo } from "react";
 import {
   createEditor,
   Descendant,
@@ -61,6 +61,16 @@ export function RichTextEditor({ initialValue, classNames, onChange }: Props) {
     []
   );
 
+  function onKeyDown(event: KeyboardEvent) {
+    for (const hotkey in HOTKEYS) {
+      if (isHotkey(hotkey, event)) {
+        event.preventDefault();
+        const mark = HOTKEYS[hotkey as keyof typeof HOTKEYS];
+        toggleMark(editor, mark);
+      }
+    }
+  }
+
   return (
     <Slate editor={editor} initialValue={initialValue} onChange={onChange}>
       <div className={classNames?.root}>
@@ -85,15 +95,7 @@ export function RichTextEditor({ initialValue, classNames, onChange }: Props) {
             <div {...props} className="text-gray-400" />
           )}
           spellCheck
-          onKeyDown={(event) => {
-            for (const hotkey in HOTKEYS) {
-              if (isHotkey(hotkey, event)) {
-                event.preventDefault();
-                const mark = HOTKEYS[hotkey as keyof typeof HOTKEYS];
-                toggleMark(editor, mark);
-              }
-            }
-          }}
+          onKeyDown={onKeyDown}
           className={cn(
             "p-5 border-x-0 border-gray-400 border-b border-t-0 sm:border-x focus:outline-none min-h-[300px] max-h-[500px] overflow-y-auto placeholder:pt-5",
             classNames?.editor
