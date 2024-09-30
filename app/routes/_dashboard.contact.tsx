@@ -6,6 +6,7 @@ import { PencilLine } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { Descendant } from "slate";
 import { RichTextEditor } from "~/components/editor";
+import { Heading } from "~/components/heading";
 import { LoadingView } from "~/components/loading/loading-view";
 import { Button } from "~/components/ui/button";
 import { useToast } from "~/hooks/use-toast";
@@ -63,7 +64,7 @@ export default function Contact() {
   }
   return (
     <>
-      <h1 className="font-bold text-3xl inline-flex w-full justify-between items-center border-black border-b-[1px] pb-3">
+      <Heading>
         Contact{" "}
         {contact.updated_at && (
           <span className="text-amber-950 flex gap-2 text-sm">
@@ -71,7 +72,7 @@ export default function Contact() {
             {format(contact.updated_at, "yyyy/MM/dd - HH:mm", { locale: ja })}
           </span>
         )}
-      </h1>
+      </Heading>
 
       <Form onSubmit={onSubmit}>
         <div className="font-sans">

@@ -31,7 +31,7 @@ export default function Gallery() {
   const { gallery } = useLoaderData<typeof clientLoader>();
   return (
     <>
-      <div className="mb-10 p-0 flex flex-row items-center justify-between">
+      <div className="mb-10 mx-4 sm:mx-0 p-0 flex flex-row items-center justify-between">
         <h1 className="font-bold text-lg">全投稿</h1>
         <Button className="text-md" asChild>
           <Link to={"/gallery/post"}>新規作成</Link>
@@ -42,9 +42,9 @@ export default function Gallery() {
           <Link
             key={i}
             to={`/gallery/${g.id}`}
-            className="flex h-28 bg-white flex-row border transition hover:-translate-x-[1px] hover:-translate-y-[1px] hover:opacity-60"
+            className="flex h-20 sm:h-28 bg-white flex-row border transition hover:-translate-x-[1px] hover:-translate-y-[1px] hover:opacity-60"
           >
-            <div className="relative aspect-square h-full bg-slate-200">
+            <div className="aspect-square h-full bg-slate-200">
               <img
                 src={g.url}
                 alt="kari"
@@ -55,12 +55,14 @@ export default function Gallery() {
               />
             </div>
             <div className="flex flex-col gap-1 overflow-hidden px-2 py-2">
-              <p className="truncate font-semibold">{g.title}</p>
+              <p className="truncate text-sm sm:text-base font-semibold">
+                {g.title}
+              </p>
               <p
                 className={cn(
                   g.description && "text-gray-600",
                   !g.description && "text-gray-300",
-                  "line-clamp-2 text-xs italic"
+                  "line-clamp-2 text-[8px] sm:text-xs italic"
                 )}
               >
                 {g.description || "-"}
@@ -69,7 +71,7 @@ export default function Gallery() {
                 className={cn(
                   g.updatedAt && "text-gray-600",
                   !g.updatedAt && "text-gray-300",
-                  "font-mono text-xs"
+                  "font-mono text-[8px] sm:text-xs"
                 )}
               >
                 {g.updatedAt

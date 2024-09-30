@@ -15,6 +15,7 @@ import { useDropzone } from "react-dropzone-esm";
 import { Descendant } from "slate";
 import { DnD } from "~/components/dnd";
 import { RichTextEditor } from "~/components/editor";
+import { Heading } from "~/components/heading";
 import { LoadingView } from "~/components/loading/loading-view";
 import { Button } from "~/components/ui/button";
 import { useToast } from "~/hooks/use-toast";
@@ -102,7 +103,7 @@ export default function About() {
 
   return (
     <Form onSubmit={onSubmit}>
-      <h1 className="font-bold text-3xl inline-flex w-full justify-between items-center border-black border-b-[1px] pb-3">
+      <Heading>
         About{" "}
         {about.updated_at && (
           <span className="text-amber-950 flex gap-2 text-sm">
@@ -110,7 +111,7 @@ export default function About() {
             {format(about.updated_at, "yyyy/MM/dd - HH:mm", { locale: ja })}
           </span>
         )}
-      </h1>
+      </Heading>
 
       <h2 className="font-bold text-lg mt-5">アイコンを変更する</h2>
       <img src={icon} alt="" className="size-[100px] mt-3" />

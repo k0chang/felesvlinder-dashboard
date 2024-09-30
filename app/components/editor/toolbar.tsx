@@ -9,7 +9,7 @@ export const Toolbar = forwardRef<HTMLDivElement, ComponentProps<"div">>(
       ref={ref}
       className={cn(
         className,
-        "relative flex border border-b-2 border-gray-400"
+        "relative flex border-x-0 sm:border-x border-t border-b-2 border-gray-400"
       )}
     />
   )

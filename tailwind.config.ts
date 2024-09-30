@@ -74,6 +74,14 @@ export default {
           "70%": { opacity: "1", visibility: "visible" },
           "100%": { opacity: "0", visibility: "hidden" },
         },
+        "slide-in-up-to-down": {
+          from: { transform: "translateY(-100%)" },
+          to: { transform: "translateY(0)" },
+        },
+        "slide-out-down-to-up": {
+          from: { transform: "translateY(0)" },
+          to: { transform: "translateY(-100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -81,6 +89,8 @@ export default {
         "moving-moon": "moving-moon 1s linear infinite",
         "fade-in": "fade-in 0.2s ease-out",
         "fade-out": "fade-out 2.5s ease-out forwards",
+        "slide-in-up-to-down": "slide-in-up-to-down 0.5s ease-in-out",
+        "slide-out-down-to-up": "slide-out-down-to-up 0.5s ease-in-out",
       },
     },
   },

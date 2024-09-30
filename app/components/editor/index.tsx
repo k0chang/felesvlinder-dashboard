@@ -48,9 +48,6 @@ const HOTKEYS = {
 } as const;
 
 export function RichTextEditor({ initialValue, classNames, onChange }: Props) {
-  // const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
-  // const [linkUrl, setLinkUrl] = useState("");
-
   const renderElement = useCallback(
     (props: RenderElementProps) => <Element {...props} />,
     []
@@ -98,26 +95,10 @@ export function RichTextEditor({ initialValue, classNames, onChange }: Props) {
             }
           }}
           className={cn(
-            "p-5 border border-gray-400 border-t-0 focus:outline-none min-h-[300px] max-h-[500px] overflow-y-auto placeholder:pt-5",
+            "p-5 border-x-0 border-gray-400 border-b border-t-0 sm:border-x focus:outline-none min-h-[300px] max-h-[500px] overflow-y-auto placeholder:pt-5",
             classNames?.editor
           )}
         />
-        {/* <Popover open={true} onOpenChange={setLinkPopoverOpen}>
-          <PopoverContent>
-            <Input
-              placeholder="URL"
-              onChange={(val) => setLinkUrl(val.target.value)}
-            />
-            <Button
-              onClick={() => {
-                setLinkPopoverOpen(false);
-                toggleMark(editor, "link");
-              }}
-            >
-              決定
-            </Button>
-          </PopoverContent>
-        </Popover> */}
       </div>
     </Slate>
   );
