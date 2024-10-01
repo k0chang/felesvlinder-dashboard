@@ -1,4 +1,4 @@
-import { Form, json, useLoaderData } from "@remix-run/react";
+import { Form, json, MetaFunction, useLoaderData } from "@remix-run/react";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale/ja";
 import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
@@ -12,8 +12,9 @@ import { Button } from "~/components/ui/button";
 import { useToast } from "~/hooks/use-toast";
 import { type Contact, contactSchema } from "~/models/contact";
 
+export const meta: MetaFunction = () => [{ title: "Contact | FELESVLINDER" }];
+
 export async function clientLoader() {
-  document.title = "Contact | FELESVLINDER";
   const db = getFirestore();
   const contactRef = doc(db, "contact", "v2");
   const contactDoc = await getDoc(contactRef);

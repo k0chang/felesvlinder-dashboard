@@ -4,6 +4,7 @@ import {
   ClientLoaderFunctionArgs,
   Form,
   Link,
+  MetaFunction,
   useLoaderData,
   useNavigate,
   useNavigation,
@@ -27,6 +28,7 @@ import {
 import { ArrowLeft, PencilLine } from "lucide-react";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone-esm";
+import { z } from "zod";
 import { DnD } from "~/components/dnd";
 import { LoadingView } from "~/components/loading/loading-view";
 import { Button, buttonVariants } from "~/components/ui/button";
@@ -45,6 +47,14 @@ import { useToast } from "~/hooks/use-toast";
 import { galleryFormSchema, gallerySchema } from "~/models/gallery";
 import { getImageFileMeta } from "~/utils/image";
 
+export const meta: MetaFunction = ({ data }) => {
+  const result = z.object({ gallery: gallerySchema }).safeParse(data);
+  if (result.success) {
+    return [{ title: `${result.data.gallery.title} | Gallery` }];
+  }
+  return [{ title: "Gallery | FELESVLINDER" }];
+};
+
 export async function clientLoader({ params }: ClientLoaderFunctionArgs) {
   if (!params.id) {
     throw new Response("Not found", { status: 404 });
@@ -55,8 +65,6 @@ export async function clientLoader({ params }: ClientLoaderFunctionArgs) {
   if (!docSnap.exists()) {
     throw new Response("Not found", { status: 404 });
   }
-
-  document.title = `${docSnap.data().title} | Gallery`;
 
   return {
     gallery: gallerySchema.parse(docSnap.data()),

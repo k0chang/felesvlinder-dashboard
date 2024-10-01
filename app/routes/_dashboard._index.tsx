@@ -1,8 +1,8 @@
-import { MetaFunction, useNavigate } from "@remix-run/react";
+import { useNavigate } from "@remix-run/react";
 import { getAuth } from "firebase/auth";
 import { useEffect } from "react";
 
-export const meta: MetaFunction = () => {
+export const meta = () => {
   return [
     { title: "ダッシュボード | FELESVLINDER" },
     { name: "description", content: "管理画面のホームだよ" },
@@ -19,8 +19,7 @@ export default function Dashboard() {
       navigate("/sign-in");
     }
     navigate("/gallery");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [auth.currentUser, navigate]);
 
   return null;
 }

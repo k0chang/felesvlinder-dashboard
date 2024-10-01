@@ -1,6 +1,11 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { Form, useNavigate, useNavigation } from "@remix-run/react";
+import {
+  Form,
+  MetaFunction,
+  useNavigate,
+  useNavigation,
+} from "@remix-run/react";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { useState } from "react";
@@ -14,10 +19,7 @@ import { useToast } from "~/hooks/use-toast";
 import { galleryFormSchema, GalleryPayload } from "~/models/gallery";
 import { getImageFileMeta } from "~/utils/image";
 
-export async function clientLoader() {
-  document.title = "新規投稿 | FELESVLINDER";
-  return null;
-}
+export const meta: MetaFunction = () => [{ title: "新規投稿 | FELESVLINDER" }];
 
 export default function GalleryPost() {
   const [storage, db] = [getStorage(), getFirestore()];

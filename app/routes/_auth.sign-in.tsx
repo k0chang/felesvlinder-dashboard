@@ -1,6 +1,11 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { Form, useNavigate, useNavigation } from "@remix-run/react";
+import {
+  Form,
+  MetaFunction,
+  useNavigate,
+  useNavigation,
+} from "@remix-run/react";
 import { FirebaseError } from "firebase/app";
 import {
   getAuth,
@@ -19,10 +24,7 @@ const signInFormSchema = z.object({
   password: z.string({ required_error: "パスワードを入力" }),
 });
 
-export function clientLoader() {
-  document.title = "ログイン | FELESVLINDER";
-  return null;
-}
+export const meta: MetaFunction = () => [{ title: "ログイン | FELESVLINDER" }];
 
 export default function SignIn() {
   const auth = getAuth();

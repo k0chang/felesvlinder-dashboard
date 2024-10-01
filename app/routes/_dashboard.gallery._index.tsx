@@ -1,4 +1,4 @@
-import { json, Link, useLoaderData } from "@remix-run/react";
+import { json, Link, MetaFunction, useLoaderData } from "@remix-run/react";
 import { format } from "date-fns";
 import {
   collection,
@@ -11,9 +11,9 @@ import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import { gallerySchema } from "~/models/gallery";
 
-export async function clientLoader() {
-  document.title = "全投稿 | FELESVLINDER";
+export const meta: MetaFunction = () => [{ title: "全投稿 | FELESVLINDER" }];
 
+export async function clientLoader() {
   const db = getFirestore();
   const q = query(collection(db, "gallery"), orderBy("updatedAt", "desc"));
   const querySnapshot = await getDocs(q);
